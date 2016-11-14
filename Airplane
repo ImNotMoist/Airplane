@@ -21,13 +21,15 @@ public class Airplane
    private int columnPartner; 
    private int seatsLeft;
    private int numberOfRandom;
+   private int choise;
    
    public Airplane()
    {
        seatsLeft = 48;
-       numberOfRandom = 2;
+       numberOfRandom = 48;
        seats = new Seat[SECTION][ROW];
        initializeSeats();
+       randomFill();
    }
     
    public void initializeSeats()
@@ -67,37 +69,60 @@ public class Airplane
         }
     }
 
-   public void windowSingle(Passenger p)
+   public void windowSingle(Passenger p, int classNumber)
    {
+       int section = SECTION;
+       if (classNumber == 1)
+       {
+           section = 5;
+       }
        for (int j = 1; j < 2; j++)
        {  
-           for (int i = 1; i < SECTION; i++)
+           for (int i = classNumber; i < section; i++)
            {
-               if (seats[SECTION][j].getVacancy() == true)
+               if (seats[j][i].getVacancy() == true)
                {
-                   seats[SECTION][j].assignPassenger(p);
-                   seats[SECTION][j].setVacancy(false);
+                   seats[j][i].assignPassenger(p);
+                   seats[j][i].setVacancy(false);
+                   break;
                }
                
-               else if (seats[SECTION][4].getVacancy() == true)
+               else if (seats[4][i].getVacancy() == true)
                {
-                   seats[SECTION][4].assignPassenger(p);
-                   seats[SECTION][4].setVacancy(false);
+                   seats[4][i].assignPassenger(p);
+                   seats[4][i].setVacancy(false);
+                   break;
+               }
+               else
+               {
+                   System.out.print("There are no more seats.");
                }
            }
        }
    }
     
-   public void notWindowSingle(Passenger p)
+   public void notWindowSingle(Passenger p,int classNumber)
    {
-       for (int j = 2; j < 4; j++)
+       int section = SECTION;
+       if (classNumber == 1)
+       {
+           section = 5;
+       }
+       for (int j = 2; j < 3; j++)
        {  
-           for (int i = 1; i < SECTION; i++)
+           for (int i = classNumber; i < section; i++)
            {
-               if (seats[SECTION][j].getVacancy() == true)
+               if (seats[j][i].getVacancy() == true)
                {
-                   seats[SECTION][j].assignPassenger(p);
-                   seats[SECTION][j].setVacancy(false);
+                   seats[j][i].assignPassenger(p);
+                   seats[j][i].setVacancy(false);
+                   break;
+               }
+               else if (seats[3][i].getVacancy() == true)
+               {
+                   seats[3][i].assignPassenger(p);
+                   seats[3][i].setVacancy(false);
+                   break;
                }
            }
        }
@@ -107,7 +132,7 @@ public class Airplane
    {
        Random generator = new Random();
        int counter = 1;
-       while(counter <= numberOfRandom)
+       while (counter <= numberOfRandom)
         {
            int section = generator.nextInt(4) + 1;
            int row = generator.nextInt(12) + 1;
@@ -245,10 +270,6 @@ public class Airplane
            }
        }
        
-       else
-       {
-           return true;
-       }
        if (count == grouping)
        {
            startColumn = startColumn-grouping;
@@ -271,21 +292,56 @@ public class Airplane
                seatsLeft = seatsLeft - grouping;
            }
        }
+       else if (columnPreferences(grouping) == true)
+       {
+           for (int i = startColumn; i < startColumn + grouping; i++)
+           {
+               seats[columnPartner][i].assignPassenger(p);
+               seats[columnPartner][i].setVacancy(false);
+               seatsLeft = seatsLeft - grouping;
+           }
+       }
+       else
+       {
+           System.out.print("It is not possible");
+       }
    }
    
    public void printName()
      {
-          for(int k =1; k < ROW;k++)
+         String[] columnLetters = {"","A","B","C","D"};
+          for(int k = 1; k < SECTION; k++)
           {
-              for(int i = 1; i < SECTION; i++)
+              for(int i = 1; i < ROW; i++)
               {
-                if(seats[i][k].getVacancy()== false)
+                if(seats[k][i].getVacancy()== false)
                   {
-                 System.out.println("Row: " + k + " Passengers: " + seats[i][k].getPassenger().getFullName());
+                 System.out.println("Column: "+columnLetters[k]+ " Row: " + i + " Passengers: " + seats[k][i].getPassenger().getFullName());
                   }
               }
           }
       }
+   
+      public void removePassenger(int row, String column) 
+      {
+	   
+	   int columnNum = 0;
+	   
+	   if(column.equals("A")) {
+			columnNum = 1;
+		} else if(column.equals("B")) {
+			columnNum = 2;
+		} else if(column.equals("C")) {
+			columnNum = 3;
+		} else {
+			columnNum = 4;
+		}
+	   
+	   if(seats[columnNum][row].getVacancy() == false) {
+		   seats[columnNum][row].setVacancy(true);
+	   }
+	   
+   }
    
    public void displayMenu() //*
    {
@@ -295,7 +351,6 @@ public class Airplane
    
    while(cont == true)
    {
-           
            System.out.println();
            System.out.println("Enter 0 to display all seats");
            System.out.println("Enter 1 to reserve seats manually");
@@ -311,7 +366,7 @@ public class Airplane
                printSeats();            
            }
            
-           else if(a == 1)
+           else if (a == 1)
            {
                System.out.print("Enter in your first name: ");
                String firname = input.next();
@@ -323,7 +378,7 @@ public class Airplane
                reserveSeats(donny, bow.substring(0,1), Integer.parseInt(bow.substring(1)));
            }
            
-           else if(a == 2) 
+           else if (a == 2) 
            {
                System.out.print("Enter in your first name: ");
                String firname = input.next();
@@ -333,26 +388,44 @@ public class Airplane
                randomSeating(donny, 1);
            }
            
-           else if(a == 3) 
+           else if (a == 3) 
            {
-               System.out.print("Enter in your first name: ");
-               String firname = input.next();
-               System.out.print("Enter in your last name: ");
-               String laname = input.next();
-               Passenger donny = new Passenger(firname, laname);
                System.out.println("Would you like to be seated in a group or as a single?");
                System.out.println("Enter 1 for single, 2 for group");
                int choice = input.nextInt();
                if (choice == 1)
                {
-                   System.out.print("Would you like to reserve a window seat? (y/n)");
-                   if (input.next().equalsIgnoreCase("y"))
+                   System.out.print("Enter in your first name: ");
+                   String firname = input.next();
+                   System.out.print("Enter in your last name: ");
+                   String laname = input.next();
+                   Passenger donny = new Passenger(firname, laname);
+                   System.out.print("Would you like a first class seat? (y/n)");
+                   if (input.next().equals("y"))
                    {
-                       windowSingle(donny);
+                       choise = 1;
+                       System.out.print("Would you like to reserve a window seat? (y/n)");
+                       if (input.next().equalsIgnoreCase("y"))
+                       {
+                       windowSingle(donny, choise);
+                       }
+                       else
+                       {
+                       notWindowSingle(donny, choise);
+                       }
                    }
                    else
                    {
-                       notWindowSingle(donny);
+                       choise = 5;
+                       System.out.print("Would you like to reserve a window seat? (y/n)");
+                       if (input.next().equalsIgnoreCase("y"))
+                       {
+                       windowSingle(donny, choise);
+                       }
+                       else
+                       {
+                       notWindowSingle(donny, choise);
+                       }
                    }
                }
                
@@ -362,7 +435,15 @@ public class Airplane
                    int grouping = input.nextInt();
                    if (rowPreferences(grouping) == true)
                    {
-                       
+                       for (int i = 0; i < grouping; i++)
+                       {
+                           System.out.print("Enter in passenger's first name: ");
+                           String firstname = input.next();
+                           System.out.print("Enter in passenger's last name: ");
+                           String lastname = input.next();
+                           Passenger donster = new Passenger(firstname, lastname);
+                           assignment(donster, grouping);
+                       }
                    }
                }
                
@@ -371,10 +452,30 @@ public class Airplane
                    System.out.print("That is not a valid option");
                }
            }
-           
-           else if(a == 4) 
-           {
                
+           else if (a == 4) 
+           {
+               System.out.print("What row is the person sitting in? (A,B,C,D):");
+               String inserted = input.next();
+               System.out.print("What is the column the person is sitting in? (1-12):");
+               int bobby = input.nextInt();
+               removePassenger(bobby, inserted);
+               System.out.print("Would you like to update the reservation? (y/n)");
+               if (input.next().equals("y"))
+               {
+               System.out.println("Enter in row letter and seat number: ");
+               String bow = input.next();
+               System.out.println("Enter in first name of passenger");
+               String fN = input.next();
+               System.out.println("Enter in last name of passenger");
+               String lN = input.next();
+               Passenger breh = new Passenger(fN, lN);
+               reserveSeats(breh, bow.substring(0,1), Integer.parseInt(bow.substring(1)));
+               }
+               else
+               {
+                   
+               }
            }
            
            else if(a == 5) //*
