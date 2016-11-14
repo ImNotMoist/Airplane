@@ -1,37 +1,40 @@
 /**
- * Write a description of class Airplane here.
+ * User can input preferences of seating on the airplane.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author (David Chu & Henry Nguyen) 
+ * @version (11/14/16)
  */
 import java.util.Random;
 import java.util.Scanner;
+import java.util.*;
 
 public class Airplane
 {
    private final int ROW = 13;  //ROW 1 - 12
    private final int SECTION = 5; //SEAT A - D
-   private Seat[][] seats;
-   private Random generator = new Random();
-   private final int numberOfSeats = 48;
-   private int grouping;
-   private int startRow;
-   private int startColumn;
-   private int rowPartner;
-   private int columnPartner; 
-   private int seatsLeft;
-   private int numberOfRandom;
+   private Seat[][] seats; //seats 2d array holding passengers
+   private Random generator = new Random(); // Random object
+   private final int numberOfSeats = 48; //seats in airplane
+   private int seatsLeft; //number of seats left
+   private int numberOfRandom; //number of random passengers (JayChou's)
    private int choise;
    
+   /**
+    * Constructs airplane
+    */
    public Airplane()
    {
        seatsLeft = 48;
-       numberOfRandom = 48;
+       numberOfRandom =47;
        seats = new Seat[SECTION][ROW];
        initializeSeats();
        randomFill();
    }
     
+   /**
+    * Initializes seats
+    * (Postcondition: seats will be initialized)
+    */
    public void initializeSeats()
    {
        for (int j = 1; j < ROW; j++)
@@ -69,6 +72,13 @@ public class Airplane
         }
     }
 
+   /**
+    * Places specified passenger in first available window seat
+    * (Postcondition: Passenger will be assigned in seats if possible)
+    * @param p Passenger object
+    * @param classNumber first class or second class
+    * (Precondition: p must be defined, classNumber has to be 1 or 5)
+    */
    public void windowSingle(Passenger p, int classNumber)
    {
        int section = SECTION;
@@ -101,7 +111,14 @@ public class Airplane
        }
    }
     
-   public void notWindowSingle(Passenger p,int classNumber)
+   /**
+    * Places specified passenger in first available aisle seat
+    * (Postcondition: Passenger will be initialized in seats if possible)
+    * @param p Passenger object
+    * @param classNumber first class or second class
+    * (Precondition: p must be defined, classNumber has to be 1 or 5)
+    */
+   public void notWindowSingle(Passenger p, int classNumber)
    {
        int section = SECTION;
        if (classNumber == 1)
@@ -128,6 +145,10 @@ public class Airplane
        }
    }
    
+   /**
+    * Randomly initializes JayChou's in seats
+    * (Postcondition: A certain amount of JayChou's will be in seats)
+    */
    public void randomFill()
    {
        Random generator = new Random();
@@ -148,7 +169,13 @@ public class Airplane
        }
    }
    
-   public void randomSeating(Passenger p, int grouping)
+   /**
+    * Places passenger p in random seat
+    * (Postcondition: Passenger p will sit in a random seat)
+    * @param p Passenger object
+    * (Precondition: Passenger p is defined)
+    */
+   public void randomSeating(Passenger p)
    {
            Random generator = new Random();
            int section = generator.nextInt(ROW-1) + 1;
@@ -161,6 +188,14 @@ public class Airplane
            }
    }
    
+   /**
+    * Places passenger in desired seat
+    * (Postcondition: seat where passenger wants to sit will be reserved)
+    * @param p Passenger object
+    * @param row row letter where passenger wants to sit
+    * @param seatNumber column number where passenger wants to sit
+    * (Precondition: Passenger has to be defined, row is either a/b/c/d, seatNumber is between 1-12)
+    */
    public void reserveSeats(Passenger p, String row, int seatNumber)
    {
        if (row.equalsIgnoreCase("a") && (seats[1][seatNumber].getVacancy() == true))
@@ -193,7 +228,11 @@ public class Airplane
        }
    }
    
-   public void printSeats() //*
+   /**
+    * Prints out seating chart
+    * (Postcondition: seating chart will be printed out)
+    */
+   public void printSeats()
    {
        for (int j = 1; j < SECTION; j++)
        {
@@ -208,105 +247,59 @@ public class Airplane
        }
    }
    
-   public boolean rowPreferences(int grouping) //*
+   /**
+    * Assigns seats to people who want to sit together
+    * (Postcondition: Passengers will be seated if possible)
+    * @param p ArrayList containing a vertain amount of Passenger objects
+    * @param start the starting point of the column, dictated by the first class or second class choice
+    * (Precondition: ArrayList is defined, start is either 1 or 5)
+    */
+   public void assignment(ArrayList<Passenger> p, int start)
    {
-       int count = 0;       
-       if (grouping > 1)
+       if (p.size() > seatsLeft)
        {
-           for (int i = 0; i < SECTION; i++)
+           System.out.print("There are not enough available seats.");
+           return;
+       }
+       int counter = 0;
+       while (counter < p.size()+1)
+       {
+       for (int i = 1; i < SECTION; i++)
+       {
+           for (int j = start; j < ROW; j++)
            {
-               for (int j = 0; j < ROW; j++)
+               if (seats[i][j].getVacancy() == true && seats[i][j+1].getVacancy() == true)
                {
-                   if (seats[i][j].getVacancy() == true)
-                   {
-                       count++;
-                       startRow = j;
-                       rowPartner = i;
-                   }
-                   else
-                   {
-                       count = 0;
-                       startRow = -1;
-                       rowPartner = -1;
-                   }
+                   seats[i][j].assignPassenger(p.get(counter));
+                   seats[i][j].setVacancy(false);
+                   counter++;
+                   seats[i][j+1].assignPassenger(p.get(counter));
+                   seats[i][j+1].setVacancy(false);
+                   counter++;
+               }
+               else if ((seats[i][j].getVacancy() == true && seats[i][j+1].getVacancy() == true))
+               {
+                   seats[i][j].assignPassenger(p.get(counter));
+                   seats[i][j].setVacancy(false);
+                   counter++;
+                   seats[i+1][j].assignPassenger(p.get(counter));
+                   seats[i+1][j].setVacancy(false);
+                   counter++;
+               }
+               
+               if(counter >= p.size())
+               {
+                   return;
                }
            }
        }
-       
-       else
-       {
-           return true;
-       }
-       if (count == grouping)
-       {
-           startRow = startRow-grouping;
-           return true;
-       }
-       else
-       {
-           return false;
        }
    }
-   
-   public boolean columnPreferences (int grouping) //*
-   {
-       int count = 0;       
-       if (grouping <=4)
-       {
-           for (int i = 0; i < ROW; i++)
-           {
-               for (int j = 0; j < SECTION; j++)
-               {
-                   if (seats[i][j].getVacancy() == true)
-                   {
-                       count++;
-                       startColumn = j-grouping;
-                   }
-                   else
-                   {
-                       count = 0;
-                   }
-               }
-           }
-       }
-       
-       if (count == grouping)
-       {
-           startColumn = startColumn-grouping;
-           return true;
-       }
-       else
-       {
-           return false;
-       }
-   }
-   
-   public void assignment(Passenger p, int grouping)
-   {
-       if (rowPreferences(grouping) == true)
-       {
-           for (int i = startRow; i < startRow+grouping; i++)
-           {
-               seats[rowPartner][i].assignPassenger(p);
-               seats[rowPartner][i].setVacancy(false);
-               seatsLeft = seatsLeft - grouping;
-           }
-       }
-       else if (columnPreferences(grouping) == true)
-       {
-           for (int i = startColumn; i < startColumn + grouping; i++)
-           {
-               seats[columnPartner][i].assignPassenger(p);
-               seats[columnPartner][i].setVacancy(false);
-               seatsLeft = seatsLeft - grouping;
-           }
-       }
-       else
-       {
-           System.out.print("It is not possible");
-       }
-   }
-   
+
+   /**
+   * Prints out names of people along with row letter and column number
+   * (Postcondition: Everyone who is seated will be printed)
+   */
    public void printName()
      {
          String[] columnLetters = {"","A","B","C","D"};
@@ -320,10 +313,17 @@ public class Airplane
                   }
               }
           }
-      }
-   
-      public void removePassenger(int row, String column) 
-      {
+      }   
+      
+   /**
+   * Removes the person who wants to cancel their flight
+   * (Postcondition: Person will be removed if person is on flight list)
+   * @param row row where passenger is sitting
+   * @param column letter of row where passenger is sitting 
+   * (Precondition: column is either a/b/c/d and row is an int 1-12)
+   */
+   public void removePassenger(int row, String column) 
+   {
 	   
 	   int columnNum = 0;
 	   
@@ -343,11 +343,16 @@ public class Airplane
 	   
    }
    
-   public void displayMenu() //*
+   /**
+    * Displays menu to choose options for sitting on airplane
+    * (Postcondition: Airplane seating options will be displayed and can be interacted with)
+    */
+   public void displayMenu() 
    {
        
    Scanner input = new Scanner(System.in);
    boolean cont = true;
+   ArrayList pass = new ArrayList<Passenger>();
    
    while(cont == true)
    {
@@ -385,7 +390,7 @@ public class Airplane
                System.out.print("Enter in your last name: ");
                String laname = input.next();
                Passenger donny = new Passenger(firname, laname);
-               randomSeating(donny, 1);
+               randomSeating(donny);
            }
            
            else if (a == 3) 
@@ -431,22 +436,31 @@ public class Airplane
                
                else if (choice == 2)
                {
+                   System.out.print("Would you like first class seats? (y/n)");
+                   if (input.next().equals("y"))
+                   {
+                       choise = 1;
+                   }
+                   else
+                   {
+                       choise = 5;
+                   }
                    System.out.println("How many people would you like to be grouped with?");
                    int grouping = input.nextInt();
-                   if (rowPreferences(grouping) == true)
+                   int count = 0;
+                   while (count < grouping)
                    {
-                       for (int i = 0; i < grouping; i++)
-                       {
-                           System.out.print("Enter in passenger's first name: ");
-                           String firstname = input.next();
-                           System.out.print("Enter in passenger's last name: ");
-                           String lastname = input.next();
-                           Passenger donster = new Passenger(firstname, lastname);
-                           assignment(donster, grouping);
-                       }
+                   System.out.print("Enter in your first name: ");
+                   String firsname = input.next();
+                   System.out.print("Enter in your last name: ");
+                   String lasname = input.next();
+                   Passenger yo = new Passenger(firsname, lasname);
+                   pass.add(yo);
+                   count++;
                    }
+                   
+                   assignment(pass, choise);
                }
-               
                else
                {
                    System.out.print("That is not a valid option");
