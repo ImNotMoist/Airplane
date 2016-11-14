@@ -1,25 +1,20 @@
 /**
- * Write a description of class PlaneT here.
+ * Serves as the tester class for Airplane.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author (David Chu & Henry Nguyen) 
+ * @version (11/14/16)
  */
 import java.util.Scanner;
 public class PlaneT
 {
+   /**
+    * Creates Airplane object and runs displayMenu();
+    */
     public static void main(String[] args) //*
    {
        Airplane crash = new Airplane();
        crash.printSeats();
        Scanner input = new Scanner (System.in);
-       crash.displayMenu;
-       
-       
-       
-       
-       
-       
-       
-       
-   }
+       crash.displayMenu();
+    }
 }
