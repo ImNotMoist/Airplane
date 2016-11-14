@@ -327,11 +327,11 @@ public class Airplane
 	   
 	   int columnNum = 0;
 	   
-	   if(column.equals("A")) {
+	   if(column.equalsIgnoreCase("A")) {
 			columnNum = 1;
-		} else if(column.equals("B")) {
+		} else if(column.equalsIgnoreCase("B")) {
 			columnNum = 2;
-		} else if(column.equals("C")) {
+		} else if(column.equalsIgnoreCase("C")) {
 			columnNum = 3;
 		} else {
 			columnNum = 4;
